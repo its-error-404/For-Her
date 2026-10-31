@@ -198,7 +198,7 @@ footer { text-align: center; color: var(--dim); font-family: var(--display); fon
   <section class="span">
     <span class="label">Between us</span>
     <h2>My moon lives in <em>Trivandrum</em></h2>
-    <svg class="arc" viewBox="0 0 360 170" role="img" aria-label="An arc connecting Urapakkam and Trivandrum">
+    <svg class="arc" viewBox="0 0 360 170" role="img" aria-label="An arc connecting Urapakkam and C-DAC, Trivandrum">
       <path d="M 300 120 Q 180 -10 60 120" fill="none" stroke="var(--haze)" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"/>
       <circle cx="300" cy="120" r="5" fill="var(--haze)"/>
       <circle cx="60" cy="120" r="7" fill="var(--glow)"/>
@@ -206,8 +206,9 @@ footer { text-align: center; color: var(--dim); font-family: var(--display); fon
       <circle cx="60" cy="120" r="24" fill="none" stroke="var(--glow)" stroke-opacity=".15"/>
       <text class="city" x="300" y="152" text-anchor="middle">Urapakkam</text>
       <text x="300" y="168" text-anchor="middle">12.86°N 80.07°E</text>
+      <text x="52" y="88" text-anchor="middle">C-DAC</text>
       <text class="city" x="60" y="156" text-anchor="middle">Trivandrum</text>
-      <text x="60" y="170" text-anchor="middle">8.52°N 76.94°E</text>
+      <text x="60" y="170" text-anchor="middle">8.51°N 76.96°E</text>
       <text x="180" y="62" text-anchor="middle" id="arcKm">— km</text>
     </svg>
     <div class="facts">
@@ -379,4 +380,65 @@ var GATE = {
   function desc(age){ return phaseName(age) + " · " + Math.round(litFrac(age)*100) + "% lit"; }
   document.getElementById("moonInfo").textContent = desc(againAge);
   document.getElementById("phFirst").textContent = desc(firstAge);
-  document.getElementById("phAgain").textContent = desc(aga
+  document.getElementById("phAgain").textContent = desc(againAge);
+  document.getElementById("tonightText").textContent =
+    "Tonight: " + phaseName(nowAge).toLowerCase() + ", " + Math.round(litFrac(nowAge)*100) +
+    "% lit. Same one over Urapakkam and Trivandrum.";
+
+  function hav(a, b){
+    var R = 6371, toR = Math.PI/180;
+    var dLat = (b[0]-a[0])*toR, dLon = (b[1]-a[1])*toR;
+    var h = Math.pow(Math.sin(dLat/2),2) + Math.cos(a[0]*toR)*Math.cos(b[0]*toR)*Math.pow(Math.sin(dLon/2),2);
+    return 2*R*Math.asin(Math.sqrt(h));
+  }
+  var km = Math.round(hav([12.8636, 80.0674], [8.5103, 76.9609]));
+  document.getElementById("km").textContent = km;
+  document.getElementById("arcKm").textContent = km + " km";
+
+  function daysSince(utcMidnightIST){ return Math.max(0, Math.floor((Date.now() - utcMidnightIST) / 864e5)); }
+  document.getElementById("days").textContent = daysSince(Date.UTC(2026, 5, 28, 18, 30));
+  document.getElementById("daysFirst").textContent = daysSince(Date.UTC(2022, 7, 31, 18, 30)).toLocaleString("en-IN");
+
+  var lines = [
+    "He's purring. Slightly less sad now.",
+    "Tail's going. He'd still like a call though.",
+    "Okay, he's happy. Ten minutes of your time would make his whole week.",
+    "He says thank you. Go drink some water, busy girl."
+  ];
+  var n = 0, cat = document.getElementById("cat");
+  document.getElementById("patBtn").addEventListener("click", function(){
+    cat.classList.add("happy");
+    document.getElementById("purr").textContent = lines[Math.min(n, lines.length-1)];
+    n++;
+    clearTimeout(cat._t);
+    cat._t = setTimeout(function(){ cat.classList.remove("happy"); }, 2600);
+  });
+
+  var sc = document.getElementById("stars"), sx = sc.getContext("2d"), stars = [];
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function sizeStars(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    sc.width = innerWidth * dpr; sc.height = innerHeight * dpr;
+    sx.setTransform(dpr,0,0,dpr,0,0);
+    var r = rand(611), cnt = Math.round(innerWidth * innerHeight / 2600);
+    stars = [];
+    for (var i=0;i<cnt;i++) stars.push({x:r()*innerWidth, y:r()*innerHeight, s:r()*1.2+0.2, p:r()*6.28, v:0.4+r()*1.4});
+  }
+  function frame(ts){
+    sx.clearRect(0,0,innerWidth,innerHeight);
+    for (var i=0;i<stars.length;i++){
+      var s = stars[i], al = reduce ? 0.7 : 0.45 + 0.45*Math.sin(s.p + ts/1000*s.v);
+      sx.globalAlpha = al; sx.fillStyle = "#e9e6ff";
+      sx.beginPath(); sx.arc(s.x, s.y, s.s, 0, Math.PI*2); sx.fill();
+    }
+    sx.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  sizeStars(); frame(0);
+  if (!reduce) requestAnimationFrame(frame);
+  window.addEventListener("resize", function(){ sizeStars(); if (reduce) frame(0); });
+})();
+</script>
+
+</body>
+</html>
