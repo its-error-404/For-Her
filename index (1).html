@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070a1d">
+<title>Same Moon, Vaishu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Karla:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+
+/* Layout: one narrow night-sky column over a live starfield; moon hero, two nights, two-city span, cat + message close. Deliberately single dark theme. */
+:root {
+  --sky: #0c1230;
+  --sky-deep: #070a1d;
+  --moon: #f4ecd6;
+  --haze: #9aa3d4;
+  --dim: #5f6798;
+  --ink: #03040c;
+  --glow: #ffd88c;
+  --line: rgba(154,163,212,.22);
+  --display: "Instrument Serif", "Cormorant Garamond", Georgia, serif;
+  --body: "Karla", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--sky-deep); color: var(--moon); }
+body {
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  background: radial-gradient(120% 80% at 50% 0%, var(--sky) 0%, var(--sky-deep) 70%) fixed, var(--sky-deep);
+  min-height: 100%;
+}
+#stars { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+main {
+  position: relative; z-index: 1;
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 56px 72px;
+  display: flex; flex-direction: column; gap: 88px;
+}
+.label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--haze);
+}
+.for-you { font-family: var(--display); font-style: italic; font-size: 24px; color: var(--moon); letter-spacing: 0; }
+h1, h2 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(44px, 12vw, 68px); line-height: 1; }
+h1 em, h2 em { color: var(--glow); }
+h2 { font-size: clamp(30px, 8vw, 40px); line-height: 1.1; }
+p { margin: 0; }
+
+/* Hero */
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+.moon-wrap { position: relative; width: min(78vw, 300px); aspect-ratio: 1; max-width: 100%; margin-top: 8px; }
+#moon { width: 100%; height: 100%; display: block; }
+.moon-caption { display: flex; flex-direction: column; gap: 4px; }
+.moon-caption .when { font-family: var(--display); font-style: italic; font-size: 22px; color: var(--moon); }
+.lead { color: var(--haze); max-width: 34ch; }
+
+/* Two nights */
+.nights { display: flex; flex-direction: column; gap: 22px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+.night { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; min-width: 0; }
+.night canvas { width: 120px; height: 120px; max-width: 100%; }
+.night .d { font-family: var(--display); font-size: 21px; line-height: 1.2; }
+.night .what { font-size: 13px; color: var(--haze); }
+.night .ph { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.body-copy { color: var(--haze); max-width: 40ch; }
+
+/* Two cities */
+.span { display: flex; flex-direction: column; gap: 22px; }
+.arc { width: 100%; height: auto; display: block; overflow: visible; }
+.arc text { font-family: var(--mono); font-size: 11px; fill: var(--haze); letter-spacing: .06em; }
+.arc .city { font-family: var(--display); font-size: 22px; fill: var(--moon); letter-spacing: 0; }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.fact { background: rgba(7,10,29,.82); padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fact b { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1; color: var(--moon); font-variant-numeric: tabular-nums; }
+.fact span { font-size: 13px; color: var(--haze); }
+.tonight { display: flex; align-items: center; gap: 14px; color: var(--haze); font-size: 15px; }
+.tonight canvas { width: 44px; height: 44px; flex: none; }
+
+/* Message */
+.note { display: flex; flex-direction: column; gap: 24px; }
+.cat { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; overflow: visible; }
+.cat .tail { transform-origin: 176px 92px; animation: sway 3.6s ease-in-out infinite; }
+.cat.happy .tail { animation: flick .45s ease-in-out infinite; }
+.cat .ear-r { transform-origin: 78px 46px; transition: transform .2s; }
+.cat.happy .ear-r { transform: rotate(-10deg); }
+.cat .sad { transition: opacity .2s; }
+.cat .glad { opacity: 0; transition: opacity .2s; }
+.cat.happy .sad { opacity: 0; }
+.cat.happy .glad { opacity: 1; }
+@keyframes sway { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(7deg); } }
+@keyframes flick { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(16deg); } }
+blockquote {
+  margin: 0; font-family: var(--display); font-size: clamp(25px, 6.8vw, 32px); line-height: 1.3;
+  color: var(--moon); text-wrap: pretty;
+}
+.sign { color: var(--haze); font-style: italic; font-family: var(--display); font-size: 20px; }
+.pat {
+  align-self: flex-start;
+  font: 600 15px/1 var(--body); color: var(--ink); background: var(--glow);
+  border: 0; border-radius: 999px; padding: 14px 22px; cursor: pointer;
+  box-shadow: 0 0 24px rgba(255,216,140,.35);
+  transition: transform .15s;
+}
+.pat:hover { transform: translateY(-1px); }
+.pat:focus-visible { outline: 2px solid var(--moon); outline-offset: 3px; }
+#purr { color: var(--haze); min-height: 1.6em; }
+footer { text-align: center; color: var(--dim); font-family: var(--display); font-style: italic; font-size: 19px; }
+@media (prefers-reduced-motion: reduce) {
+  .cat .tail, .cat.happy .tail { animation: none; }
+}
+
+/* Gate */
+#gate {
+  position: fixed; inset: 0; z-index: 20;
+  background: radial-gradient(120% 80% at 50% 0%, var(--sky) 0%, var(--sky-deep) 70%), var(--sky-deep);
+  display: flex; align-items: center; justify-content: center;
+  padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+  transition: opacity .7s ease, visibility .7s;
+}
+#gate.open { opacity: 0; visibility: hidden; }
+.gate-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.gate-moon { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fffaea, #e6dabb); box-shadow: 0 0 40px rgba(255,216,140,.35); position: relative; overflow: hidden; }
+.gate-moon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #1b2140; transform: translateX(42%); }
+.gate-box h1 { font-size: clamp(34px, 9vw, 44px); }
+.gate-hint { color: var(--haze); max-width: 30ch; }
+.otp { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+.otp input {
+  width: 36px; height: 48px; min-width: 0; text-align: center;
+  font: 500 22px var(--mono); color: var(--moon);
+  background: rgba(154,163,212,.08); border: 1px solid var(--line); border-radius: 10px;
+  caret-color: var(--glow);
+}
+.otp input:focus { outline: none; border-color: var(--glow); box-shadow: 0 0 0 3px rgba(255,216,140,.18); }
+.otp .gap { width: 6px; }
+.otp.shake { animation: shake .4s; }
+@keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+#gateMsg { min-height: 1.6em; color: var(--glow); font-size: 15px; }
+@media (max-width: 360px) { .otp input { width: 31px; height: 44px; font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) { .otp.shake { animation: none; } #gate { transition: none; } }
+</style>
+
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <div class="gate-box">
+    <div class="gate-moon" aria-hidden="true"></div>
+    <span class="for-you">Hey Vaishu ❤️</span>
+    <h1 id="gateTitle">This one's locked, just for you.</h1>
+    <p class="gate-hint" id="gateHint"></p>
+    <div class="otp" id="otp"></div>
+    <p id="gateMsg" aria-live="polite"></p>
+  </div>
+</div>
+<main>
+  <section class="hero">
+    <span class="for-you">For you Vaishu ❤️</span>
+    <h1>Same moon,<br><em>two cities.</em></h1>
+    <div class="moon-wrap"><canvas id="moon" role="img" aria-label="The moon as it looked on 29 June 2026"></canvas></div>
+    <div class="moon-caption">
+      <span class="when">29 June 2026</span>
+      <span class="label" id="moonInfo">The moon that night</span>
+    </div>
+    <p class="lead">This is how the moon looked the night we started talking again after that long gap. I didn't know it then, but I got my moon back that night.</p>
+  </section>
+
+  <section class="nights">
+    <span class="label">Two nights</span>
+    <h2>Before I looked up at it, <em>I looked at you.</em></h2>
+    <div class="pair">
+      <div class="night">
+        <canvas id="moonFirst" aria-hidden="true"></canvas>
+        <span class="d">1 Sept 2022</span>
+        <span class="what">The first time we talked</span>
+        <span class="ph" id="phFirst"></span>
+      </div>
+      <div class="night">
+        <canvas id="moonAgain" aria-hidden="true"></canvas>
+        <span class="d">29 June 2026</span>
+        <span class="what">When we found our way back</span>
+        <span class="ph" id="phAgain"></span>
+      </div>
+    </div>
+    <p class="body-copy">It was a thin crescent the first time, and almost full when we came back. Kind of feels right.</p>
+  </section>
+
+  <section class="span">
+    <span class="label">Between us</span>
+    <h2>My moon lives in <em>Trivandrum</em></h2>
+    <svg class="arc" viewBox="0 0 360 170" role="img" aria-label="An arc connecting Urapakkam and Trivandrum">
+      <path d="M 300 120 Q 180 -10 60 120" fill="none" stroke="var(--haze)" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"/>
+      <circle cx="300" cy="120" r="5" fill="var(--haze)"/>
+      <circle cx="60" cy="120" r="7" fill="var(--glow)"/>
+      <circle cx="60" cy="120" r="15" fill="none" stroke="var(--glow)" stroke-opacity=".4"/>
+      <circle cx="60" cy="120" r="24" fill="none" stroke="var(--glow)" stroke-opacity=".15"/>
+      <text class="city" x="300" y="152" text-anchor="middle">Urapakkam</text>
+      <text x="300" y="168" text-anchor="middle">12.86°N 80.07°E</text>
+      <text class="city" x="60" y="156" text-anchor="middle">Trivandrum</text>
+      <text x="60" y="170" text-anchor="middle">8.52°N 76.94°E</text>
+      <text x="180" y="62" text-anchor="middle" id="arcKm">— km</text>
+    </svg>
+    <div class="facts">
+      <div class="fact"><b id="km">—</b><span>kilometres apart, as the crow flies</span></div>
+      <div class="fact"><b id="daysFirst">—</b><span>days since our first hello</span></div>
+      <div class="fact"><b id="days">—</b><span>days since we found our way back</span></div>
+      <div class="fact"><b>1</b><span>moon in my sky, and it's you</span></div>
+    </div>
+    <div class="tonight"><canvas id="moonNow" aria-hidden="true"></canvas><p id="tonightText">Tonight's moon looks the same from both cities.</p></div>
+  </section>
+
+  <section class="note">
+    <span class="label">A small message</span>
+    <svg class="cat" id="cat" viewBox="0 0 230 150" role="img" aria-label="A black cat lying on a ledge, waiting">
+      <line x1="0" y1="108" x2="230" y2="108" stroke="var(--dim)" stroke-width="2" stroke-linecap="round"/>
+      <g class="tail"><path d="M 176 92 C 198 96 202 116 198 132 C 196 142 186 144 184 136" fill="none" stroke="var(--ink)" stroke-width="10" stroke-linecap="round"/></g>
+      <ellipse cx="124" cy="86" rx="62" ry="22" fill="var(--ink)"/>
+      <ellipse cx="112" cy="100" rx="70" ry="8" fill="var(--ink)"/>
+      <circle cx="64" cy="76" r="27" fill="var(--ink)"/>
+      <path d="M 44 62 L 40 34 L 62 52 Z" fill="var(--ink)"/>
+      <g class="ear-r"><path d="M 70 50 L 86 30 L 89 62 Z" fill="var(--ink)"/></g>
+      <ellipse cx="50" cy="103" rx="17" ry="6" fill="var(--ink)"/>
+      <ellipse cx="80" cy="104" rx="15" ry="5.5" fill="var(--ink)"/>
+      <g class="sad">
+        <path d="M 49 76 q 5 4 10 0 q -5 -1.5 -10 0 Z" fill="var(--glow)"/>
+        <path d="M 69 76 q 5 4 10 0 q -5 -1.5 -10 0 Z" fill="var(--glow)"/>
+        <path d="M 47 72 L 60 74" stroke="var(--glow)" stroke-width="1" stroke-opacity=".5"/>
+        <path d="M 81 72 L 68 74" stroke="var(--glow)" stroke-width="1" stroke-opacity=".5"/>
+        <path d="M 54 82 q -2 4 0 6 q 2 -2 0 -6 Z" fill="var(--haze)"/>
+      </g>
+      <g class="glad" fill="none" stroke="var(--glow)" stroke-width="2.4" stroke-linecap="round">
+        <path d="M 49 77 q 5 -6 10 0"/>
+        <path d="M 69 77 q 5 -6 10 0"/>
+      </g>
+      <g fill="none" stroke="var(--dim)" stroke-width=".8" stroke-linecap="round" opacity=".7">
+        <path d="M 46 86 L 26 84"/><path d="M 46 89 L 27 92"/>
+        <path d="M 82 86 L 100 83"/><path d="M 82 89 L 100 91"/>
+      </g>
+    </svg>
+    <blockquote>I know you're busy out there, but just letting you know this black cat is so sad waiting for you to spend some time with you&nbsp;😭</blockquote>
+    <span class="sign">— the black cat, from Urapakkam</span>
+    <button class="pat" id="patBtn" type="button">Pat the cat</button>
+    <p id="purr" aria-live="polite"></p>
+  </section>
+
+  <footer>Everyone has the same moon. Only I get to talk to mine.</footer>
+</main>
+
+<script>
+/* ---- Lock settings: change these for each page ---- */
+var GATE = {
+  code: "01092022",
+  hint: "Enter the OTP from the black cat. Hint: the day we first talked (DD MM YYYY).",
+  wrong: ["Nope. The cat is judging you.", "Still no. Think back to 2022…", "Day, month, year. You've got this."],
+  key: "gate:moon"
+};
+(function(){
+  var gate = document.getElementById("gate"), box = document.getElementById("otp"), msg = document.getElementById("gateMsg");
+  document.getElementById("gateHint").textContent = GATE.hint;
+  function open(){ gate.classList.add("open"); try { localStorage.setItem(GATE.key, "1"); } catch(e){} }
+  try { if (localStorage.getItem(GATE.key) === "1") { gate.classList.add("open"); return; } } catch(e){}
+  var n = GATE.code.length, inputs = [], tries = 0;
+  for (var i = 0; i < n; i++) {
+    if (n === 8 && (i === 2 || i === 4)) { var g = document.createElement("span"); g.className = "gap"; box.appendChild(g); }
+    var el = document.createElement("input");
+    el.id = "otp" + i; el.inputMode = "numeric"; el.maxLength = 1; el.autocomplete = "off";
+    el.setAttribute("aria-label", "Digit " + (i + 1));
+    box.appendChild(el); inputs.push(el);
+  }
+  function value(){ return inputs.map(function(x){ return x.value; }).join(""); }
+  function check(){
+    var v = value();
+    if (v.length < n) return;
+    if (v === GATE.code) { msg.textContent = "Welcome, my moon 🌙"; setTimeout(open, 600); }
+    else {
+      msg.textContent = GATE.wrong[Math.min(tries, GATE.wrong.length - 1)]; tries++;
+      box.classList.remove("shake"); void box.offsetWidth; box.classList.add("shake");
+      setTimeout(function(){ inputs.forEach(function(x){ x.value = ""; }); inputs[0].focus(); }, 450);
+    }
+  }
+  inputs.forEach(function(el, i){
+    el.addEventListener("input", function(){
+      el.value = el.value.replace(/\D/g, "").slice(-1);
+      if (el.value && i < n - 1) inputs[i + 1].focus();
+      check();
+    });
+    el.addEventListener("keydown", function(e){
+      if (e.key === "Backspace" && !el.value && i > 0) inputs[i - 1].focus();
+    });
+    el.addEventListener("paste", function(e){
+      var t = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, n);
+      if (!t) return; e.preventDefault();
+      t.split("").forEach(function(c, j){ inputs[j].value = c; });
+      inputs[Math.min(t.length, n - 1)].focus(); check();
+    });
+  });
+  setTimeout(function(){ inputs[0].focus(); }, 300);
+})();
+</script>
+<script>
+(function(){
+  var SYN = 29.530588853;
+  var REF = Date.UTC(2000, 0, 6, 18, 14);
+  function moonAge(t){ var a = ((t - REF) / 864e5) % SYN; return a < 0 ? a + SYN : a; }
+  function litFrac(age){ return (1 - Math.cos(2 * Math.PI * age / SYN)) / 2; }
+  function phaseName(age){
+    var n = [[1.0,"New moon"],[6.4,"Waxing crescent"],[8.4,"First quarter"],[13.8,"Waxing gibbous"],[15.8,"Full moon"],[21.1,"Waning gibbous"],[23.1,"Last quarter"],[28.5,"Waning crescent"],[30,"New moon"]];
+    for (var i=0;i<n.length;i++) if (age < n[i][0]) return n[i][1];
+    return "New moon";
+  }
+  function rand(seed){ return function(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+  function drawMoon(canvas, age, detailed, seed){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var size = canvas.clientWidth || 44;
+    canvas.width = size * dpr; canvas.height = size * dpr;
+    var c = canvas.getContext("2d");
+    c.scale(dpr, dpr);
+    var cx = size/2, cy = size/2, r = size * (detailed ? 0.36 : 0.44);
+    if (detailed) {
+      var g = c.createRadialGradient(cx, cy, r*0.8, cx, cy, r*1.9);
+      g.addColorStop(0, "rgba(255,226,170,0.28)"); g.addColorStop(1, "rgba(255,226,170,0)");
+      c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r*1.9, 0, Math.PI*2); c.fill();
+    }
+    c.fillStyle = "#1b2140";
+    c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2); c.fill();
+    var theta = 2 * Math.PI * age / SYN, xr = r * Math.cos(theta);
+    c.save(); c.translate(cx, cy);
+    if (age > SYN/2) c.scale(-1, 1);
+    c.beginPath();
+    c.arc(0, 0, r, -Math.PI/2, Math.PI/2, false);
+    c.ellipse(0, 0, Math.abs(xr), r, 0, Math.PI/2, -Math.PI/2, xr > 0);
+    c.closePath();
+    var lg = c.createRadialGradient(-r*0.3, -r*0.3, r*0.1, 0, 0, r);
+    lg.addColorStop(0, "#fffaea"); lg.addColorStop(1, "#e6dabb");
+    c.fillStyle = lg; c.fill();
+    c.restore();
+    if (detailed) {
+      c.save(); c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2); c.clip();
+      var rnd = rand(seed || 29062026);
+      [[-0.25,-0.2,0.32],[0.2,-0.3,0.22],[0.05,0.15,0.26],[-0.35,0.25,0.18],[0.35,0.2,0.14]].forEach(function(m){
+        c.fillStyle = "rgba(120,110,95,0.16)";
+        c.beginPath(); c.ellipse(cx+m[0]*r, cy+m[1]*r, m[2]*r, m[2]*r*0.8, rnd()*3, 0, Math.PI*2); c.fill();
+      });
+      for (var i=0;i<26;i++){
+        var a = rnd()*Math.PI*2, d = Math.sqrt(rnd())*r*0.92, cr = (0.015 + rnd()*0.045)*r;
+        var x = cx + Math.cos(a)*d, y = cy + Math.sin(a)*d;
+        c.fillStyle = "rgba(110,100,88,0.18)";
+        c.beginPath(); c.arc(x, y, cr, 0, Math.PI*2); c.fill();
+        c.strokeStyle = "rgba(255,255,255,0.12)"; c.lineWidth = 0.6;
+        c.beginPath(); c.arc(x-cr*0.2, y-cr*0.2, cr, Math.PI*0.9, Math.PI*1.7); c.stroke();
+      }
+      c.restore();
+    }
+  }
+
+  var againAge = moonAge(Date.UTC(2026, 5, 29, 15, 30));   // 29 Jun 2026, ~9 PM IST
+  var firstAge = moonAge(Date.UTC(2022, 8, 1, 15, 30));    // 1 Sep 2022, ~9 PM IST
+  var nowAge = moonAge(Date.now());
+  function render(){
+    drawMoon(document.getElementById("moon"), againAge, true, 29062026);
+    drawMoon(document.getElementById("moonFirst"), firstAge, true, 1092022);
+    drawMoon(document.getElementById("moonAgain"), againAge, true, 29062026);
+    drawMoon(document.getElementById("moonNow"), nowAge, false);
+  }
+  render();
+  window.addEventListener("resize", render);
+
+  function desc(age){ return phaseName(age) + " · " + Math.round(litFrac(age)*100) + "% lit"; }
+  document.getElementById("moonInfo").textContent = desc(againAge);
+  document.getElementById("phFirst").textContent = desc(firstAge);
+  document.getElementById("phAgain").textContent = desc(againAge);
+  document.getElementById("tonightText").textContent =
+    "Tonight: " + phaseName(nowAge).toLowerCase() + ", " + Math.round(litFrac(nowAge)*100) +
+    "% lit. Same one over Urapakkam and Trivandrum.";
+
+  function hav(a, b){
+    var R = 6371, toR = Math.PI/180;
+    var dLat = (b[0]-a[0])*toR, dLon = (b[1]-a[1])*toR;
+    var h = Math.pow(Math.sin(dLat/2),2) + Math.cos(a[0]*toR)*Math.cos(b[0]*toR)*Math.pow(Math.sin(dLon/2),2);
+    return 2*R*Math.asin(Math.sqrt(h));
+  }
+  var km = Math.round(hav([12.8636, 80.0674], [8.5241, 76.9366]));
+  document.getElementById("km").textContent = km;
+  document.getElementById("arcKm").textContent = km + " km";
+
+  function daysSince(utcMidnightIST){ return Math.max(0, Math.floor((Date.now() - utcMidnightIST) / 864e5)); }
+  document.getElementById("days").textContent = daysSince(Date.UTC(2026, 5, 28, 18, 30));
+  document.getElementById("daysFirst").textContent = daysSince(Date.UTC(2022, 7, 31, 18, 30)).toLocaleString("en-IN");
+
+  var lines = [
+    "He's purring. Slightly less sad now.",
+    "Tail's going. He'd still like a call though.",
+    "Okay, he's happy. Ten minutes of your time would make his whole week.",
+    "He says thank you. Go drink some water, busy girl."
+  ];
+  var n = 0, cat = document.getElementById("cat");
+  document.getElementById("patBtn").addEventListener("click", function(){
+    cat.classList.add("happy");
+    document.getElementById("purr").textContent = lines[Math.min(n, lines.length-1)];
+    n++;
+    clearTimeout(cat._t);
+    cat._t = setTimeout(function(){ cat.classList.remove("happy"); }, 2600);
+  });
+
+  var sc = document.getElementById("stars"), sx = sc.getContext("2d"), stars = [];
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function sizeStars(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    sc.width = innerWidth * dpr; sc.height = innerHeight * dpr;
+    sx.setTransform(dpr,0,0,dpr,0,0);
+    var r = rand(611), cnt = Math.round(innerWidth * innerHeight / 2600);
+    stars = [];
+    for (var i=0;i<cnt;i++) stars.push({x:r()*innerWidth, y:r()*innerHeight, s:r()*1.2+0.2, p:r()*6.28, v:0.4+r()*1.4});
+  }
+  function frame(ts){
+    sx.clearRect(0,0,innerWidth,innerHeight);
+    for (var i=0;i<stars.length;i++){
+      var s = stars[i], al = reduce ? 0.7 : 0.45 + 0.45*Math.sin(s.p + ts/1000*s.v);
+      sx.globalAlpha = al; sx.fillStyle = "#e9e6ff";
+      sx.beginPath(); sx.arc(s.x, s.y, s.s, 0, Math.PI*2); sx.fill();
+    }
+    sx.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  sizeStars(); frame(0);
+  if (!reduce) requestAnimationFrame(frame);
+  window.addEventListener("resize", function(){ sizeStars(); if (reduce) frame(0); });
+})();
+</script>
+
+</body>
+</html>
